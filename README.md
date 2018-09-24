@@ -1,2 +1,2 @@
 # bk-cli-template
-Templates for BK-Cli
+This is version-branch for templates
