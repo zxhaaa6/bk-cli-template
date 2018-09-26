@@ -1,0 +1,56 @@
+version: '3.4'
+
+services:
+  sample-api:
+    image: sample-api
+    build: .
+    environment:
+      - NODE_ENV=${NODE_ENV}
+      - MYSQL_HOST=mysql
+      - MYSQL_PORT=3306
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    ports:
+      - 3000:3000
+    depends_on:
+      - redis
+      - mysql
+    networks:
+      - sample-api
+    volumes:
+      - ${PWD}/:/app
+  redis:
+    image: redis:4.0.11-alpine
+    container_name: 'redis'
+    ports:
+      - 6379:6379
+    networks:
+      - sample-api
+    restart: unless-stopped
+    volumes:
+      - sample-api-redis:/data/redis
+  mysql:
+    image: mysql:8.0
+    container_name: 'mysql'
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+    ports:
+      - 3306:3306
+    restart: unless-stopped
+    volumes:
+      - 'sample-api-db:/var/lib/mysql'
+      - '${PWD}/mysql/conf:/etc/mysql/conf.d'
+    networks:
+      - sample-api
+volumes:
+  sample-api-db:
+    external: true
+  sample-api-redis:
+    external: true
+networks:
+  sample-api:
+    external: false

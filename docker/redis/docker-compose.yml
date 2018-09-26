@@ -1,0 +1,36 @@
+version: '3.4'
+
+services:
+  sample-api:
+    image: sample-api
+    build: .
+    environment:
+      - NODE_ENV=${NODE_ENV}
+      - MONGODB_HOST=mongodb
+      - MONGODB_PORT=27017
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    ports:
+      - 3000:3000
+    depends_on:
+      - redis
+    networks:
+      - sample-api
+    volumes:
+      - ${PWD}/:/app
+  redis:
+    image: redis:4.0.11-alpine
+    container_name: 'redis'
+    ports:
+      - 6379:6379
+    networks:
+      - sample-api
+    restart: unless-stopped
+    volumes:
+      - sample-api-redis:/data/redis
+volumes:
+  sample-api-redis:
+    external: true
+networks:
+  sample-api:
+    external: false

@@ -1,0 +1,60 @@
+version: '3.4'
+
+services:
+  sample-api:
+    image: sample-api
+    build: .
+    environment:
+      - NODE_ENV=${NODE_ENV}
+      - MONGODB_HOST=mongodb
+      - MONGODB_PORT=27017
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    ports:
+      - 3000:3000
+    depends_on:
+      - redis
+      - mongodb
+    networks:
+      - sample-api
+    volumes:
+      - ${PWD}/:/app
+  redis:
+    image: redis:4.0.11-alpine
+    container_name: 'redis'
+    ports:
+      - 6379:6379
+    networks:
+      - sample-api
+    restart: unless-stopped
+    volumes:
+      - sample-api-redis:/data/redis
+  mongodb:
+    image: mongo:4.0
+    container_name: 'mongodb'
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGODB_ROOT_USER}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGODB_ROOT_PASS}
+      - MONGO_DATA_DIR=/data/db
+      - MONGO_LOG_DIR=/data/db
+    ports:
+      - 27017:27017
+    restart: unless-stopped
+    volumes:
+      - '${PWD}/docker/mongo_entrypoint/:/docker-entrypoint-initdb.d/'
+      - sample-api-db:/data/db
+    networks:
+      - sample-api
+    healthcheck:
+      test: "echo 'db.stats().ok' | mongo localhost:27017/${MONGODB_DB_NAME} --quiet"
+      interval: 30s
+      timeout: 10s
+      retries: 3
+volumes:
+  sample-api-db:
+    external: true
+  sample-api-redis:
+    external: true
+networks:
+  sample-api:
+    external: false
