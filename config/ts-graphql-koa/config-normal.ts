@@ -11,6 +11,6 @@ export default {
     maxFiles: 1
   },
   corsOptions: {
-    origin: ['http://localhost:3000']
+    origin: 'http://localhost:3000'
   }
 };
