@@ -1,2 +1,2 @@
 # bk-cli-template
-Templates for BK-Cli
+Templates for BK-Cli to generate back-end services
